@@ -1,11 +1,11 @@
 # Files
 executable = scriptcondor.sh
-output = /user/jmoeil/StageXqq/macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).out
-error = /user/jmoeil/StageXqq/l1macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).err
-log = /user/jmoeil/StageXqq/macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).log
+output = /user/jmoeil/GammaXqq/macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).out
+error = /user/jmoeil/GammaXqq/macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).err
+log = /user/jmoeil/GammaXqq/macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).log
 
 transfer_input_files = $(filename)
-arguments            = $(filename)  /user/jmoeil/StageXqq/macros/condorsubmission/OUTPUTDIR/output_$(Process).root YEAR ERA ISDATA
+arguments            = $(filename)  /user/jmoeil/GammaXqq/macros/condorsubmission/OUTPUTDIR/output_$(Process).root PROCESS YEAR ERA ISDATA
 
 # File transfer behavior
 #should_transfer_files = no

@@ -23,8 +23,13 @@ def main():
     parser.add_argument("--year", dest="year", help="Year considered (2022, 2023, 2024)", type=int, default=2023)
     parser.add_argument("--era", dest="era", help="Era", type=str, default='Cv4')
     parser.add_argument("--isData", dest="isData", help="is Data or MC", type=int, default=0)
+    parser.add_argument("-p", "--process", dest="process", help="Name of the process (gjets, zg, data)", type=str, default='')
     args = parser.parse_args()
     
+    if args.process not in ['gjets','zg','data']:
+        print("Process type {} is not defined".format(args.process))
+        return
+
     ###Define the RDataFrame from the input tree
     inputFile = args.inputFile
     if inputFile == '':
@@ -75,7 +80,10 @@ def main():
     df, histos = h_gammaztobb.GammaZSelection(df, args.year, args.era, args.isData)
     df_report = df.Report()
     for i in histos:
-        histos[i].GetValue().Write()
+        theh = histos[i].GetValue()
+        theh.SetName(theh.GetName()+"_"+args.process)
+        theh.Write()
+        
 
     df_report.Print()
 

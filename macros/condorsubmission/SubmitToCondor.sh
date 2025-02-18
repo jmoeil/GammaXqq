@@ -10,8 +10,9 @@ else
     cd $1
     sed -ie "s#OUTPUTDIR#$1#g" scriptcondor.sub
     sed -ie "s#FILENAMES#$2#g" scriptcondor.sub
-    sed -ie "s#YEAR#$3#g" scriptcondor.sub
-    sed -ie "s#ERA#$4#g" scriptcondor.sub
-    sed -ie "s#ISDATA#$5#g" scriptcondor.sub
+    sed -ie "s#PROCESS#$3#g" scriptcondor.sub
+    sed -ie "s#YEAR#$4#g" scriptcondor.sub
+    sed -ie "s#ERA#$5#g" scriptcondor.sub
+    sed -ie "s#ISDATA#$6#g" scriptcondor.sub
     condor_submit scriptcondor.sub 
 fi
