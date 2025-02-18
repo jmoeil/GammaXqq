@@ -12,9 +12,9 @@ from corrections_modified import *
 
 def GammaZSelection(df, year=2023, era='C', isData=False):
     '''
-    Select events with >= 1 photon with pT>115 GeV.
+    Select events with = 1 photon with pT>100 GeV.
     The event must pass a single photon trigger. 
-    Requires exactly 2 jets and low met
+    Requires exactly 2 jets
     '''
     histos = {}
     #Trigger
@@ -58,9 +58,10 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     setupjecs(JECfile, corrfile)
     df = df.Redefine('Jet_pt', 'JetCorPt(Jet_area, Jet_eta, Jet_phi, Jet_pt, Jet_rawFactor, Rho_fixedGridRhoFastjetAll,'+str(isData)+')')
     #The following consideres only jets that are not pathological and do not have a large muon or "charged electromagnetic" energy fraction (i.e. the jet is not made mostly of a muon or an electron) 
-    df = df.Define('Jet_TightID_Pt30', 'Jet_jetId>=4&&Jet_muEF<0.5&&Jet_chEmEF<0.5&&Jet_pt>30')
+    #Also remove jets mostly of neutral EM energy (= the photon)
+    df = df.Define('Jet_TightID_Pt30', 'Jet_jetId>=4&&Jet_muEF<0.5&&Jet_chEmEF<0.5&&Jet_neEmEF<0.9&&Jet_pt>30')
     #The subset of these jets that are central 
-    df = df.Define('Jet_TightID_Pt30_Central', 'Jet_jetId>=4&&Jet_muEF<0.5&&Jet_chEmEF<0.5&&Jet_pt>30&&abs(Jet_eta)<2.4')
+    df = df.Define('Jet_TightID_Pt30_Central', 'Jet_jetId>=4&&Jet_muEF<0.5&&Jet_chEmEF<0.5&&Jet_neEmEF<0.9&&Jet_pt>30&&abs(Jet_eta)<2.4')
     df = df.Define('Jet_TightID_Pt30_Central_Pt', 'Jet_pt[Jet_TightID_Pt30_Central]')
     df = df.Define('Jet_TightID_Pt30_Central_Eta', 'Jet_eta[Jet_TightID_Pt30_Central]')
     df = df.Define('Jet_TightID_Pt30_Central_Phi', 'Jet_phi[Jet_TightID_Pt30_Central]')
@@ -71,7 +72,7 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     histos['photon_pt_2jselection'] = df.Histo1D(ROOT.RDF.TH1DModel('photon_pt_2jselection', '', 1000, 0, 1000), 'Photon_LooseID_Pt20_pt', 'LHEWeight_originalXWGTUP')
 
     #Compute the dijet invariant amss 
-    df = df.Define('Mjj', 'InvariantMass(Jet_TightID_Pt30_Central_Pt, Jet_TightID_Pt30_Central_Eta, Jet_TightID_Pt30_Central_Phi, Jet_TightID_Pt30_Central_Mass)')
+    df = df.Define('Mjj', 'InvariantMass(Jet_TightID_Pt30_Central_Pt[0], Jet_TightID_Pt30_Central_Eta[0], Jet_TightID_Pt30_Central_Phi[0], Jet_TightID_Pt30_Central_Mass[0], Jet_TightID_Pt30_Central_Pt[1], Jet_TightID_Pt30_Central_Eta[1], Jet_TightID_Pt30_Central_Phi[1], Jet_TightID_Pt30_Central_Mass[1])')
     histos['mjj'] = df.Histo1D(ROOT.RDF.TH1DModel('mjj', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
 
     return df, histos

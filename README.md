@@ -13,7 +13,7 @@ source /cvmfs/sft.cern.ch/lcg/views/setupViews.sh LCG_103 x86_64-centos7-gcc12-o
 ## Running the code
 ```
 cd macros 
-python3 analysis.py  -o output.root --year 2023 --era 'C' --isData 0 -i /pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/ZGto2QG-1Jets_PTG-100to200_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v2/2810000/9650ee14-6c75-4e22-bff3-595197189178.root
+python3 analysis.py  -o output.root --year 2023 --era 'C' --isData 0 -i /pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/ZGto2QG-1Jets_PTG-100to200_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v2/2810000/9650ee14-6c75-4e22-bff3-595197189178.root -p zg
 ```
 
 ## MC samples/data sets
