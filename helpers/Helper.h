@@ -15,13 +15,13 @@ float InvariantMass(float pt1, float eta1, float phi1, float mass1, float pt2, f
   float Mij;
   float px_1 = pt_1*cos(phi1);
   float py_1 = pt_1*sin(phi1);
-  float pz_1 = pt_1*sinh(phi1);
+  float pz_1 = pt_1*sinh(eta1);
 
   float E_1 = sqrt(px_1**2 + py_1**2 + pz_1**2);
 
   float px_2 = pt_2*cos(phi2);
   float py_2 = pt_2*sin(phi2);
-  float pz_2 = pt_2*sinh(phi2);
+  float pz_2 = pt_2*sinh(eta2);
 
   float E_2 = sqrt(px_2**2+py_2**2+pz_2**2);
   float E = E_1+E_2;
