@@ -8,6 +8,7 @@ import argparse
 sys.path.insert(0, '../helpers')
 
 import helper_gammaztobb as h_gammaztobb
+import numpy as np
 
 ROOT.gInterpreter.Declare('#include "../helpers/Helper.h"')
 
@@ -77,17 +78,32 @@ def main():
     ####The sequence of filters/column definition starts here
 
     #Everything is done in h_gammaztobb
-    df, histos = h_gammaztobb.GammaZSelection(df, args.year, args.era, args.isData)
+    df, histos, BR_Obs, n, total, ndof, chi2, difference, pvalue = h_gammaztobb.GammaZSelection(df, args.year, args.era, args.isData)
     df_report = df.Report()
     for i in histos:
         theh = histos[i].GetValue()
         theh.SetName(theh.GetName()+"_"+args.process)
         theh.Write()
-        
-
     df_report.Print()
-
     nvtx_histo.GetValue().Write()
+    
+    #peaks = np.means(peaks)
+    BR_Theo = np.array([0.115, 0.156, 0.156, 0.115, 0.151])
+    BR = BR_Theo * 1/np.sum(BR_Theo)
+    sigma_BR = np.sqrt(BR_Obs*(1-BR_Obs)/total)
+    sigma_total_BR = np.sum(sigma_BR)
+    sigma_chi2 = np.sqrt(np.sum((2*(BR_Obs-BR))/(BR)*sigma_BR))
+    print(f"Number of observation for each flavour : {n}")
+    print(f"Summation over all observations gives {total}")
+    print(f"The observed branching ratios are {BR_Obs}, with uncertainty {sigma_BR}.")
+    print(f"This sums to {np.sum(BR_Obs)}, with a total uncertainty {sigma_total_BR}.")
+    print(f"As a reminder, the theoretical BR-values are {BR}")
+    print(f"The difference between the theoretical and the observed values is {difference}.")
+    print(f"A chi2-test on these two sets gives {chi2}, with an uncertainty {sigma_chi2}")
+    print(f"The p-value is {pvalue}")
+    #print(f"The peak is {peaks} while the properties are {properties}")
+
+    #return n, total, chi2, p 
 
 if __name__ == '__main__':
     main()

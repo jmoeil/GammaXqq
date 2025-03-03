@@ -5,6 +5,8 @@ import sys
 
 from array import array
 from math import floor, ceil
+from scipy import stats
+from scipy.signal import find_peaks
 import numpy as np
 
 #For JECs
@@ -62,19 +64,81 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     df = df.Define('Jet_TightID_Pt30', 'Jet_jetId>=4&&Jet_muEF<0.5&&Jet_chEmEF<0.5&&Jet_neEmEF<0.9&&Jet_pt>30')
     #The subset of these jets that are central 
     df = df.Define('Jet_TightID_Pt30_Central', 'Jet_jetId>=4&&Jet_muEF<0.5&&Jet_chEmEF<0.5&&Jet_neEmEF<0.9&&Jet_pt>30&&abs(Jet_eta)<2.4')
+    
     df = df.Define('Jet_TightID_Pt30_Central_Pt', 'Jet_pt[Jet_TightID_Pt30_Central]')
     df = df.Define('Jet_TightID_Pt30_Central_Eta', 'Jet_eta[Jet_TightID_Pt30_Central]')
     df = df.Define('Jet_TightID_Pt30_Central_Phi', 'Jet_phi[Jet_TightID_Pt30_Central]')
     df = df.Define('Jet_TightID_Pt30_Central_Mass', 'Jet_mass[Jet_TightID_Pt30_Central]')
     
+    #The subset of these jets which hold a specific flavour
+    df = df.Define('Jet_TightID_Pt30_Central_partonFlavour', 'Jet_partonFlavour[Jet_TightID_Pt30_Central]')
+    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour1', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==1')
+    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour2', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==2')
+    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour3', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==3') 
+    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour4', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==4')
+    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour5', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==5')
+    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour6', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==6')
     #For now, consider only events with exactly 2 central jets and no other jet
     df = df.Filter('Sum(Jet_TightID_Pt30)==2&&Sum(Jet_TightID_Pt30_Central)==2','=2 central jets with pt>30 GeV, no additional jet')
     histos['photon_pt_2jselection'] = df.Histo1D(ROOT.RDF.TH1DModel('photon_pt_2jselection', '', 1000, 0, 1000), 'Photon_LooseID_Pt20_pt', 'LHEWeight_originalXWGTUP')
 
+
     #Compute the dijet invariant amss 
     df = df.Define('Mjj', 'InvariantMass(Jet_TightID_Pt30_Central_Pt[0], Jet_TightID_Pt30_Central_Eta[0], Jet_TightID_Pt30_Central_Phi[0], Jet_TightID_Pt30_Central_Mass[0], Jet_TightID_Pt30_Central_Pt[1], Jet_TightID_Pt30_Central_Eta[1], Jet_TightID_Pt30_Central_Phi[1], Jet_TightID_Pt30_Central_Mass[1])')
     histos['mjj'] = df.Histo1D(ROOT.RDF.TH1DModel('mjj', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour1'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour1)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor1', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour2'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour2)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor2', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour3'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour3)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor3', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour4'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour4)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor4', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour5'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour5)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor5', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour6'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour6)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor6', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP') # Create an histogram for two top jets. Should be empty. This line is just a sanity check.
+    histos['mjj_partonflavour1_bis'] = df.Filter('Jet_TightID_Pt30_Central_PartonFlavour1[0]&&Jet_TightID_Pt30_Central_PartonFlavour1[1]').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor1_bis', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+    # Count the number of events per flavour
+    n1 = histos['mjj_partonflavour1'].Integral(60, 120)
+    n2 = histos['mjj_partonflavour2'].Integral(60, 120)
+    n3 = histos['mjj_partonflavour3'].Integral(60, 120)
+    n4 = histos['mjj_partonflavour4'].Integral(60, 120)
+    n5 = histos['mjj_partonflavour5'].Integral(60, 120)
+    n = np.array([n1,n2,n3,n4,n5])
+    total = sum(n)
 
-    return df, histos
+    frac1 = n1/total # Valeur th√orique : 0.115
+    frac2 = n2/total # Valeur th√orique : 0.156
+    frac3 = n3/total # Valeur th√orique : 0.156
+    frac4 = n4/total # Valeur th√orique : 0.115
+    frac5 = n5/total # Valeur th√orique : 0.151
+    BR_Obs = np.array([frac1,frac2,frac3,frac4,frac5])
+    BR_Theo = np.array([0.156, 0.116, 0.156, 0.116, 0.156])  # d, u, s, c, b, t
+    BR_Theo = BR_Theo * (1/np.sum(BR_Theo))
+    sigma = np.sqrt(n)/total 
+    ndof = len(BR_Obs) - 1
+    difference = BR_Obs-BR_Theo
+    chi2 = np.sum((BR_Obs-BR_Theo)**2/BR_Theo)
+    p = 1 - stats.chi2.cdf(chi2,ndof)   
+    
+    # Get the number of bins
 
+    #n_bins1 = histos['mjj_partonflavour1'].GetNbinsX()
+    #n_bins2 = histos['mjj_partonflavour2'].GetNbinsX()
+    #n_bins3 = histos['mjj_partonflavour3'].GetNbinsX()
+    #n_bins4 = histos['mjj_partonflavour4'].GetNbinsX()
+    #n_bins5 = histos['mjj_partonflavour5'].GetNbinsX()
+    
+    # Extract the bin centers and their contents (values)
 
+    #bin_contents1 = np.array([histos['mjj_partonflavour1'].GetBinContent(i+1) for i in range(n_bins1)])  # Histogram values
+    #bin_contents2 = np.array([histos['mjj_partonflavour2'].GetBinContent(i+1) for i in range(n_bins2)])  # Histogram values
+    #bin_contents3 = np.array([histos['mjj_partonflavour3'].GetBinContent(i+1) for i in range(n_bins3)])  # Histogram values
+    #bin_contents4 = np.array([histos['mjj_partonflavour4'].GetBinContent(i+1) for i in range(n_bins4)])  # Histogram values
+    #bin_contents5 = np.array([histos['mjj_partonflavour5'].GetBinContent(i+1) for i in range(n_bins5)])  # Histogram values
+    # Use find_peaks to extract the peaks
+
+    #peaks1, properties1 = find_peaks(bin_contents1, height=300, prominence=100)  # Ajuste ces seuils selon tes donn√©e
+    #peaks2, properties2 = find_peaks(bin_contents2, height=300, prominence=100)  # Ajuste ces seuils selon tes donn√©e
+    #peaks3, properties3 = find_peaks(bin_contents3, height=300, prominence=100)  # Ajuste ces seuils selon tes donn√©e
+    #peaks4, properties4 = find_peaks(bin_contents4, height=300, prominence=100)  # Ajuste ces seuils selon tes donn√©e
+    #peaks5, properties5 = find_peaks(bin_contents5, height=300, prominence=100)  # Ajuste ces seuils selon tes donn√©
+    #peaks = np.array([
+
+ 
+    return df, histos, BR_Obs, n, total, ndof, chi2, difference, p
