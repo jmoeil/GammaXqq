@@ -1,2 +1,4 @@
 *.root
 macros/condorsubmission/
+helpers/__pycache__/
+macros/__pycache__/
