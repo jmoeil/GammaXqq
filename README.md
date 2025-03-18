@@ -21,8 +21,8 @@ python3 analysis.py  -o output.root --year 2023 --era 'C' --isData 0 -i /pnfs/ii
 The relevant MC samples for this analysis are: 
 
 "Signal" (gamma+Z(qq)):
-```
 - pT going from 100 to 200 GeV
+```
 /pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/ZGto2QG-1Jets_PTG-100to200_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v2/*/*.root
 ```
 - pT going beyond 200 GeV
@@ -34,20 +34,18 @@ The relevant MC samples for this analysis are:
 ```
 /pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/GJ_PTG-100to200_TuneCP5_13p6TeV_amcatnlo-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v14-v3/*/*.root
 ```
+
+```
 /pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/GJ_PTG-200to400_TuneCP5_13p6TeV_amcatnlo-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v14-v3/*/*.root
 ```
+
 ```
-/pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/GJ_PTG-400to600_TuneCP5_13p6TeV_amcatnlo-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v14-v3/*/*.root
+/pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/GJ_PTG-400to600_TuneCP5_13p6TeV_amcatnlo-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v*
 ```
+
 ```
-/pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/GJ_PTG-400to600_TuneCP5_13p6TeV_amcatnlo-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15_ext1-v2/*/*.root
+/pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/GJ_PTG-600_TuneCP5_13p6TeV_amcatnlo-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v*
 ```
-```
-/pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/GJ_PTG-600_TuneCP5_13p6TeV_amcatnlo-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v14-v3/*/*.root
-```
-```
-/pnfs/iihe/cms/ph/sc4/store/mc/Run3Summer23NanoAODv12/GJ_PTG-600_TuneCP5_13p6TeV_amcatnlo-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15_ext1-v2/*/*.root
-``` 
 
 Data (eras 2024C, D, E, F, G, H, I): 
 ```
