@@ -1,0 +1,55 @@
+
+Flavour 1 Results:
+Chi-Squared/Ndof: 5.104
+a0 = 0.505 ± 0.179
+a1 = 2.725 ± 0.041
+a2 = 1.310 ± 0.076
+a3 = 1.300 ± 0.045
+f  = 0.986 ± 0.040
+mean = 101.900 ± 0.145
+sigma = 14.191 ± 0.161
+Total entries in histogram: 24416
+
+Flavour 2 Results:
+Chi-Squared/Ndof: 3.650
+a0 = -3.980 ± 5.279
+a1 = 0.587 ± 0.117
+a2 = -1.725 ± 0.108
+a3 = 0.340 ± 0.136
+f  = 0.501 ± 0.034
+mean = 102.477 ± 0.136
+sigma = 12.319 ± 0.170
+Total entries in histogram: 23661
+
+Flavour 3 Results:
+Chi-Squared/Ndof: nan
+a0 = 0.478 ± 0.000
+a1 = 0.939 ± 0.000
+a2 = -0.162 ± 0.068
+a3 = 0.219 ± 0.000
+f  = 0.519 ± 0.000
+mean = 98.707 ± 0.000
+sigma = 15.122 ± 0.000
+Total entries in histogram: 23216
+
+Flavour 4 Results:
+Chi-Squared/Ndof: nan
+a0 = -0.193 ± 0.000
+a1 = 1.633 ± 0.000
+a2 = 0.234 ± 0.088
+a3 = 0.198 ± 0.000
+f  = 0.650 ± 0.000
+mean = 95.562 ± 0.000
+sigma = 14.746 ± 0.000
+Total entries in histogram: 19459
+
+Flavour 5 Results:
+Chi-Squared/Ndof: 4.065
+a0 = 0.381 ± 0.150
+a1 = 2.687 ± 0.039
+a2 = 1.218 ± 0.062
+a3 = 1.188 ± 0.036
+f  = 0.970 ± 0.018
+mean = 87.885 ± 0.193
+sigma = 16.435 ± 0.193
+Total entries in histogram: 16749

@@ -1,0 +1,55 @@
+
+Flavour 1 Results:
+Chi-Squared/Ndof: 22.388
+ndof: 95.000000
+p_value : 0.000000
+a0 = -141.104 ± 1.068
+a1 = -184.066 ± 1.395
+f  = 0.001 ± 0.506
+mean = 95.239 ± 15.697
+sigma = 9.715 ± 17.185
+Total entries in histogram: 129790
+
+Flavour 2 Results:
+Chi-Squared/Ndof: 82.009
+ndof: 95.000000
+p_value : 0.000000
+a0 = -31.804 ± 0.034
+a1 = -42.168 ± 0.044
+f  = 0.000 ± 0.635
+mean = 101.145 ± 13.425
+sigma = 7.619 ± 17.910
+Total entries in histogram: 542909
+
+Flavour 3 Results:
+Chi-Squared/Ndof: 12.620
+ndof: 95.000000
+p_value : 0.000000
+a0 = -93.156 ± 45.517
+a1 = -119.413 ± 59.070
+f  = 0.859 ± 0.737
+mean = 85.277 ± 5.595
+sigma = 5.005 ± 2.982
+Total entries in histogram: 86227
+
+Flavour 4 Results:
+Chi-Squared/Ndof: 43.398
+ndof: 95.000000
+p_value : 0.000000
+a0 = -54.950 ± 0.489
+a1 = -70.103 ± 0.614
+f  = 0.760 ± 0.794
+mean = 93.849 ± 16.652
+sigma = 6.129 ± 17.590
+Total entries in histogram: 324128
+
+Flavour 5 Results:
+Chi-Squared/Ndof: 10.150
+ndof: 95.000000
+p_value : 0.000000
+a0 = -9596.584 ± 1371.205
+a1 = -9747.972 ± 2040.946
+f  = 0.996 ± 0.228
+mean = 102.062 ± 9.793
+sigma = 5.358 ± 3.387
+Total entries in histogram: 64255
