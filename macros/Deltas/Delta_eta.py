@@ -30,7 +30,7 @@ def plot_hist(hist_name,x_label):
 
 # Process both Source and background
 for S in [0,1]:
-	if S == 1 : 
+	if S == 1: 
 		inputfile = ROOT.TFile('../Source.root','open')
 		# Dictionnary linked histogram names to x-axis labels.
 		hist_names = {
