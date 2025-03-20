@@ -87,15 +87,17 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     histos['Jet_delta_eta'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_delta_eta','',100,0,5), 'Jet_delta_eta','LHEWeight_originalXWGTUP')
 
     # Delta phi
-    df = df.Define('Jet_delta_phi','abs(Jet_TightID_Pt30_Central_Phi[0]-Jet_TightID_Pt30_Central_Phi[1])')
+    df = df.Define('Jet_delta_phi','abs(acos(cos(Jet_TightID_Pt30_Central_Phi[0]-Jet_TightID_Pt30_Central_Phi[1])))')
     histos['Jet_delta_phi'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_delta_phi','',100,0,5), 'Jet_delta_phi','LHEWeight_originalXWGTUP')
 
     # Delta pT
-    df = df.Define('Jet_delta_pT','abs(Jet_TightID_Pt30_Central_Pt[1]-Jet_TightID_Pt30_Central_Pt[0])')
+    df = df.Define('Jet_pt1','Jet_TightID_Pt30_Central_Pt[0]')
+    df = df.Define('Jet_pt2','Jet_TightID_Pt30_Central_Pt[1]')
+    df = df.Define('Jet_delta_pT','abs(Jet_pt1-Jet_pt2)')
     histos['Jet_delta_pT'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_delta_pT','',1000,0,1000), 'Jet_delta_pT', 'LHEWeight_originalXWGTUP')
 
     # pT2/pT1
-    df = df.Define('Jet_pT2pT1','Jet_TightID_Pt30_Central_Pt[1]/Jet_TightID_Pt30_Central_Pt[0]')
+    df = df.Define('Jet_pT2pT1','Jet_pt2/Jet_pt1')
     histos['Jet_pT2pT1'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_pT2pT1','',1000,0,1000),'Jet_pT2pT1','LHEWeight_originalXWGTUP')
 
     #Compute the dijet invariant mass 
