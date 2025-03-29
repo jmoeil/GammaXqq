@@ -30,3 +30,16 @@ float InvariantMass(float pt1, float eta1, float phi1, float mass1, float pt2, f
 
   return Mij;
 }
+
+float Ratio_pt(float pt1,float pt2){
+	if (pt1 == 0 || pt2 == 0){
+		std::cerr << "Error: Division by zero in Ratio_pt. pt1 = " << pt1 << ", pt2 = " << pt2 << std::endl;
+	}
+
+	if (pt1 > pt2){
+		return pt2/pt1;
+	}
+	else{
+		return pt1/pt2;
+	}
+}
