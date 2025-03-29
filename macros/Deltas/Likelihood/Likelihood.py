@@ -17,8 +17,8 @@ def load_DeltaR_CSV(filename):
 
 # Load signal and background data
 
-deltaR_sig,entries_sig = load_DeltaR_CSV('../Approx_DeltaR_zg.csv')
-deltaR_bkg,entries_bkg = load_DeltaR_CSV('../Approx_DeltaR_gjets.csv')
+deltaR_sig,entries_sig = load_DeltaR_CSV('../Jet_DeltaR_zg.csv')
+deltaR_bkg,entries_bkg = load_DeltaR_CSV('../Jet_DeltaR_gjets.csv')
 
 # Normalize to get PDF
 

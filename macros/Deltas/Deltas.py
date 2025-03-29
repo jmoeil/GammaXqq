@@ -57,7 +57,7 @@ def plot_approx_deltaR(hist_eta_name,hist_phi_name,label_suffix):
 		y_vals.append(entry)
 
 	# Save in a CSV file
-	csv_filename = f'Approx_DeltaR_{label_suffix}.csv'
+	csv_filename = f'Jet_DeltaR_{label_suffix}.csv'
 	with open(csv_filename,mode='w',newline='') as f:
 		writer = csv.writer(f)
 		writer.writerow(["Delta R","Entries"])
@@ -71,7 +71,7 @@ def plot_approx_deltaR(hist_eta_name,hist_phi_name,label_suffix):
 	plt.title(r'Approximate $\Delta R$ distribution')
 	plt.grid()
 	
-	filename=f'Jet_delta_R_{label_suffix}.png'
+	filename=f'Jet_deltaR_{label_suffix}.png'
 	plt.savefig(filename,dpi=300)
 	print(f'Saved {filename}')
 	plt.close()
@@ -86,7 +86,6 @@ for S in [0,1]:
 			"Jet_delta_eta_zg;1": r"$\Delta\eta$",
 			"Jet_delta_phi_zg;1": r"$\Delta\phi$",
 			"Jet_delta_pT_zg;1": r"$\Delta p_T$",
-			"Jet_pT2pT1_zg;1": r"$\frac{p_{T2}}{p_{T1}}$",
 			'Jet_pT1pT2_zg;1':r"$\frac{p_{T2}}{p_{T1}}$",
 		}
 		hist_eta_name = 'Jet_delta_eta_zg;1'
@@ -98,7 +97,6 @@ for S in [0,1]:
 			"Jet_delta_eta_gjets;1": r"$\Delta\eta$",
 			"Jet_delta_phi_gjets;1": r"$\Delta\phi$",
 			"Jet_delta_pT_gjets;1": r"$\Delta p_T$",
-			"Jet_pT2pT1_gjets;1":r'$\frac{p_{T2}}{p_{T1}}$',
 			'Jet_pT1pT2_gjets;1':r'$\frac{p_{T2}}{p_{T1}}$',
 		}
 		hist_eta_name = 'Jet_delta_eta_gjets;1'
