@@ -116,7 +116,7 @@ for varname,info in variables.items():
 	safename = info['sig_hist'].split('_zg')[0]
 	# --- Plotting ---
 	plt.plot(x_vals,likelihoods,label='Likelihood ratio')
-	plt.xlabel(r'$\Delta\eta$')
+	plt.xlabel(info['xlabel'])
 	plt.ylabel('Likelihood Discriminant')
 	plt.title(f'Likelihood Discriminant for {varname}')
 	plt.grid(True)
