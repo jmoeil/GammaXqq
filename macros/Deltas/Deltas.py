@@ -87,6 +87,7 @@ for S in [0,1]:
 			"Jet_delta_phi_zg;1": r"$\Delta\phi$",
 			"Jet_delta_pT_zg;1": r"$\Delta p_T$",
 			'Jet_pT1pT2_zg;1':r"$\frac{p_{T2}}{p_{T1}}$",
+			"Jet_delta_R_zg;1":r"$\Delta R = \sqrt{\Delta\eta^2 + \Delta\phi^2}$"
 		}
 		hist_eta_name = 'Jet_delta_eta_zg;1'
 		hist_phi_name = 'Jet_delta_phi_zg;1'
@@ -98,6 +99,7 @@ for S in [0,1]:
 			"Jet_delta_phi_gjets;1": r"$\Delta\phi$",
 			"Jet_delta_pT_gjets;1": r"$\Delta p_T$",
 			'Jet_pT1pT2_gjets;1':r'$\frac{p_{T2}}{p_{T1}}$',
+			"Jet_delta_R_gjets;1":r'$\Delta R = \sqrt{\Delta\eta^2 + \Delta\phi^2}$'
 		}
 		hist_eta_name = 'Jet_delta_eta_gjets;1'
 		hist_phi_name = 'Jet_delta_phi_gjets;1'
@@ -106,7 +108,7 @@ for S in [0,1]:
 	for hist_name,x_label in hist_names.items():
 		plot_hist(hist_name, x_label)
 
-	plot_approx_deltaR(hist_eta_name,hist_phi_name,label_suffix)
+	#plot_approx_deltaR(hist_eta_name,hist_phi_name,label_suffix)
 	inputfile.Close()
 
 '''

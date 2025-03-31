@@ -4,12 +4,12 @@ import numpy as np
 from scipy.stats import chi2 as chi2_stats
 
 # Load ROOT files and retrieve the histograms
-S = 0
+S = 1
 
 if S == 1:
-	inputfile = ROOT.TFile("../output_100to200and200.root", "open") # Signal
+	inputfile = ROOT.TFile("../Source.root", "open") # Signal
 else:
-	inputfile = ROOT.TFile('../GammaAndJets.root',"open") # Background
+	inputfile = ROOT.TFile('../Background.root',"open") # Background
 
 # Open a text file to store results
 output_filename = "fit_results.txt"
