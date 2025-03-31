@@ -125,13 +125,13 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     #Compute the dijet invariant mass 
     df = df.Define('Mjj', 'InvariantMass(Jet_TightID_Pt30_Central_Pt[0], Jet_TightID_Pt30_Central_Eta[0], Jet_TightID_Pt30_Central_Phi[0], Jet_TightID_Pt30_Central_Mass[0], Jet_TightID_Pt30_Central_Pt[1], Jet_TightID_Pt30_Central_Eta[1], Jet_TightID_Pt30_Central_Phi[1], Jet_TightID_Pt30_Central_Mass[1])')
     histos['mjj'] = df.Histo1D(ROOT.RDF.TH1DModel('mjj', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour1'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour1)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor1', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour2'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour2)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor2', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour3'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour3)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor3', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour4'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour4)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor4', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour5'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour5)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor5', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour6'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour6)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor6', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP') # Create an histogram for two top jets. Should be empty. This line is just a sanity check.
-    histos['mjj_partonflavour1_bis'] = df.Filter('Jet_TightID_Pt30_Central_PartonFlavour1[0]&&Jet_TightID_Pt30_Central_PartonFlavour1[1]').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavor1_bis', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+    histos['mjj_partonflavour1'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour1)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour1', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour2'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour2)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour2', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour3'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour3)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour3', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour4'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour4)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour4', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour5'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour5)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour5', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
+    histos['mjj_partonflavour6'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour6)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour6', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP') # Create an histogram for two top jets. Should be empty. This line is just a sanity check.
+    histos['mjj_partonflavour1_bis'] = df.Filter('Jet_TightID_Pt30_Central_PartonFlavour1[0]&&Jet_TightID_Pt30_Central_PartonFlavour1[1]').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour1_bis', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
 
    # --- Mjj after vetoes: Delta R < 2 and pT2/pT1 > 0.4 ---
     vetoed_df = df.Filter('Jet_delta_R > 0.75 && Jet_delta_R < 2 && Jet_pT2pT1 > 0.4', 'DeltaR < 2 and pT2/pT1 > 0.4')
