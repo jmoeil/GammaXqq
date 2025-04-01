@@ -83,7 +83,7 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     histos['photon_pt_2jselection'] = df.Histo1D(ROOT.RDF.TH1DModel('photon_pt_2jselection', '', 1000, 0, 1000), 'Photon_LooseID_Pt20_pt', 'LHEWeight_originalXWGTUP')
 
     #Compute the dijet invariant mass and remore invariant mass outside range of study
-    df = df.Define('Mjj_Before_Deltas', 'InvariantMass(Jet_TightID_Pt30_Central_Pt[0], Jet_TightID_Pt30_Central_Eta[0], Jet_TightID_Pt30_Central_    Phi[0], Jet_TightID_Pt30_Central_Mass[0], Jet_TightID_Pt30_Central_Pt[1], Jet_TightID_Pt30_Central_Eta[1], Jet_TightID_Pt30_Central    _Phi[1], Jet_TightID_Pt30_Central_Mass[1])')
+    df = df.Define('Mjj_Before_Deltas', 'InvariantMass(Jet_TightID_Pt30_Central_Pt[0], Jet_TightID_Pt30_Central_Eta[0], Jet_TightID_Pt30_Central_Phi[0], Jet_TightID_Pt30_Central_Mass[0], Jet_TightID_Pt30_Central_Pt[1], Jet_TightID_Pt30_Central_Eta[1], Jet_TightID_Pt30_Central_Phi[1], Jet_TightID_Pt30_Central_Mass[1])')
     df = df.Filter('Mjj_Before_Deltas < 200','Invariant mass clearly outside the range of this study')    
 
     # Delta eta
