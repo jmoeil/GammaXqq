@@ -101,7 +101,7 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
 
     # pT1/pT2
     df = df.Define('Jet_pT2pT1','Ratio_pt(Jet_pt1,Jet_pt2)')
-    histos ['Jet_pT2pT1'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_pT1pT2','',100,0,1),'Jet_pT1pT2','LHEWeight_originalXWGTUP')
+    histos ['Jet_pT2pT1'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_pT2pT1','',100,0,1),'Jet_pT2pT1','LHEWeight_originalXWGTUP')
 
     # Angular distance R
     df = df.Define('Jet_delta_R','sqrt(pow(Jet_delta_eta,2) + pow(Jet_delta_phi,2))')
@@ -116,7 +116,7 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     df = df.Define('PJet_Delta_R','sqrt(pow(PJet_Delta_eta,2) + pow(PJet_Delta_phi,2))') # Delta R leading jet and photon
     df = df.Define('PSubJet_Delta_R','sqrt(pow(PSubJet_Delta_eta,2) + pow(PSubJet_Delta_phi,2))') # Delta R subleading jet and photon
 
-   df = df.Filter('PJet_Delta_R > 0.4 && PSubJet_Delta_R > 0.4',f'Angular distance between the photon and both jets is > 0.4')
+    df = df.Filter('PJet_Delta_R > 0.4 && PSubJet_Delta_R > 0.4',f'Angular distance between the photon and both jets is > 0.4')
     
     # Plot these variables in histograms
     flavour_id = [k for k in range(1,6)]
