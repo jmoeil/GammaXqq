@@ -82,6 +82,10 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     df = df.Filter('Sum(Jet_TightID_Pt30)==2&&Sum(Jet_TightID_Pt30_Central)==2','=2 central jets with pt>30 GeV, no additional jet')
     histos['photon_pt_2jselection'] = df.Histo1D(ROOT.RDF.TH1DModel('photon_pt_2jselection', '', 1000, 0, 1000), 'Photon_LooseID_Pt20_pt', 'LHEWeight_originalXWGTUP')
 
+    #Compute the dijet invariant mass and remore invariant mass outside range of study
+    df = df.Define('Mjj_Before_Deltas', 'InvariantMass(Jet_TightID_Pt30_Central_Pt[0], Jet_TightID_Pt30_Central_Eta[0], Jet_TightID_Pt30_Central_    Phi[0], Jet_TightID_Pt30_Central_Mass[0], Jet_TightID_Pt30_Central_Pt[1], Jet_TightID_Pt30_Central_Eta[1], Jet_TightID_Pt30_Central    _Phi[1], Jet_TightID_Pt30_Central_Mass[1])')
+    df = df.Filter('Mjj_Before_Deltas < 200','Invariant mass clearly outside the range of this study')    
+
     # Delta eta
     df = df.Define('Jet_delta_eta','abs(Jet_TightID_Pt30_Central_Eta[0]-Jet_TightID_Pt30_Central_Eta[1])')
     histos['Jet_delta_eta'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_delta_eta','',100,0,5), 'Jet_delta_eta','LHEWeight_originalXWGTUP')
@@ -102,7 +106,18 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     # Angular distance R
     df = df.Define('Jet_delta_R','sqrt(pow(Jet_delta_eta,2) + pow(Jet_delta_phi,2))')
     histos['Jet_delta_R'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_delta_R','',100,0,5),'Jet_delta_R','LHEWeight_originalXWGTUP')
-   
+
+    # Veto Delta R(photon,j1) > 0.4
+    df = df.Define('PJet_Delta_eta','abs(Photon_TightID_Pt100_eta[0]-Jet_TightID_Pt30_Central_Eta[0])') # Delta eta leading jet and photon
+    df = df.Define('PJet_Delta_phi','abs(acos(cos(Photon_TightID_Pt100_phi[0]-Jet_TightID_Pt30_Central_Phi[0])))') # Delta phi leading jet and photon
+    df = df.Define('PSubJet_Delta_eta','abs(Photon_TightID_Pt100_eta[0]-Jet_TightID_Pt30_Central_Eta[1])') # Delta eta subleading jet and photon
+    df = df.Define('PSubJet_Delta_phi','abs(acos(cos(Photon_TightID_Pt100_phi[0]-Jet_TightID_Pt30_Central_Phi[1])))') # Delta phi subleading jet and photon
+    
+    df = df.Define('PJet_Delta_R','sqrt(pow(PJet_Delta_eta,2) + pow(PJet_Delta_phi,2))') # Delta R leading jet and photon
+    df = df.Define('PSubJet_Delta_R','sqrt(pow(PSubJet_Delta_eta,2) + pow(PSubJet_Delta_phi,2))') # Delta R subleading jet and photon
+
+   df = df.Filter('PJet_Delta_R > 0.4 && PSubJet_Delta_R > 0.4',f'Angular distance between the photon and both jets is > 0.4')
+    
     # Plot these variables in histograms
     flavour_id = [k for k in range(1,6)]
     variables = {
