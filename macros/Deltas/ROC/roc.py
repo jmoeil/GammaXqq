@@ -87,7 +87,7 @@ for label, info in variables.items():
     all_curves[label] = (FPR,TPR,auc)
     TPR_list.append(TPR)
     FPR_list.append(FPR)
-    label_list.append(f'{label} (AUC={auc:.3f})')
+    label_list.append(f'{label}')
     auc_list.append(auc)
     print(f'ROC curve for {label} ready')
 
