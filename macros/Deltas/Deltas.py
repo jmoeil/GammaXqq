@@ -1,5 +1,5 @@
 import ROOT
-from array import array 
+#from array import array
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import chi2 as chi2_stats
@@ -86,7 +86,7 @@ for S in [0,1]:
 			"Jet_delta_eta_zg;1": r"$\Delta\eta$",
 			"Jet_delta_phi_zg;1": r"$\Delta\phi$",
 			"Jet_delta_pT_zg;1": r"$\Delta p_T$",
-			'Jet_pT1pT2_zg;1':r"$\frac{p_{T2}}{p_{T1}}$",
+			'Jet_pT2pT1_zg;1':r"$\frac{p_{T2}}{p_{T1}}$",
 			"Jet_delta_R_zg;1":r"$\Delta R = \sqrt{\Delta\eta^2 + \Delta\phi^2}$"
 		}
 		hist_eta_name = 'Jet_delta_eta_zg;1'
@@ -98,7 +98,7 @@ for S in [0,1]:
 			"Jet_delta_eta_gjets;1": r"$\Delta\eta$",
 			"Jet_delta_phi_gjets;1": r"$\Delta\phi$",
 			"Jet_delta_pT_gjets;1": r"$\Delta p_T$",
-			'Jet_pT1pT2_gjets;1':r'$\frac{p_{T2}}{p_{T1}}$',
+			'Jet_pT2pT1_gjets;1':r'$\frac{p_{T2}}{p_{T1}}$',
 			"Jet_delta_R_gjets;1":r'$\Delta R = \sqrt{\Delta\eta^2 + \Delta\phi^2}$'
 		}
 		hist_eta_name = 'Jet_delta_eta_gjets;1'

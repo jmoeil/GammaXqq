@@ -3,8 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-#cut_dir = 'less'
-
 # --- Import ROOT files ---
 file_sg = ROOT.TFile('../../Source.root')
 file_bg = ROOT.TFile('../../Background.root')
@@ -17,6 +15,10 @@ variables = {
     r'$\frac{p_{T2}}{p_{T1}}$': {'hist_name': 'Jet_pT2pT1', 'xrange': (0, 1),'cut_dir': 'greater'},
     r'$\Delta R$': {'hist_name': 'Jet_delta_R', 'xrange': (0, 4),'cut_dir': 'less'}
 }
+
+# --- Stock global curves ---
+
+all_curves = {}
 
 # --- Make a plot ---
 def plot_roc(FPR,TPR,labels,title,outpath,auc=None):
@@ -79,25 +81,37 @@ for label, info in variables.items():
         FPR.append(bg_pass)
     
     FPR,TPR = zip(*sorted(zip(FPR,TPR)))
+    FPR = list(FPR)
+    TPR = list(TPR)
     auc = np.trapz(TPR, FPR)
+    all_curves[label] = (FPR,TPR,auc)
     TPR_list.append(TPR)
     FPR_list.append(FPR)
     label_list.append(f'{label} (AUC={auc:.3f})')
     auc_list.append(auc)
     print(f'ROC curve for {label} ready')
 
-plot_roc(FPR_list,TPR_list,label_list,title='ROC curves for signal discrimination',outpath='plots/roc_all_variables.png')
+plot_roc(FPR_list,TPR_list,label_list,title='ROC curves for signal discrimination',outpath='plots/ROC_all_variables.png',auc=auc_list)
 
 # --- Kinematic ROC per flavour ---
-flavours = [f'PartonFlavour{i}' if i != 0 else '' for i in range(0,6)]
+flavours = [f'PartonFlavour{i}' if i != 0 else '' for i in range(1,6)]
 print('*** Making ROC curves per flavour ***\n')
 for label, info in variables.items():
 	print(f'\n=== Working on {label} ===\n')
 	plt.figure(figsize=(8, 6))  # One figure per variable
 	TPR_list,FPR_list,label_list,auc_list = [],[],[],[]
+
+	if label in all_curves:
+		FPR_all,TPR_all,auc_all = all_curves[label]
+		FPR_list.append(list(FPR_all))
+		TPR_list.append(TPR_all)
+		auc_list.append(auc_all)
+		label_list.append("all")
+		print(f'ROC curve for {label} ready')
+		
 	for flavour in flavours:
 		suffix = f'_{flavour}' if flavour else ''
-		
+
 		sg_hist_name = f'{info["hist_name"]}{suffix}_zg'
 		bg_hist_name = f'{info["hist_name"]}{suffix}_gjets'
 
@@ -130,7 +144,7 @@ for label, info in variables.items():
 			FPR.append(bg_pass)
 		FPR,TPR = zip(*sorted(zip(FPR,TPR)))
 		auc = np.trapz(TPR,FPR)
-		legend_label = 'all' if flavour=='' else flavour
+		legend_label = 'all (from flavours)' if flavour=='' else flavour
 		
 		TPR_list.append(TPR)
 		FPR_list.append(FPR)
@@ -138,5 +152,4 @@ for label, info in variables.items():
 		auc_list.append(auc)
 		print(f'ROC curve for {label} {legend_label} ready')
 
-	# --- Plot styling ---
-	plot_roc(TPR_list,FPR_list,label_list,title=f'ROC curves for {label} by jet flavour', outpath=f'plots/ROC_{info["hist_name"]}.png',auc=auc_list)
+	plot_roc(FPR_list,TPR_list,label_list,title=f'ROC curves for {label} by jet flavour', outpath=f'plots/ROC_{info["hist_name"]}.png',auc=auc_list)
