@@ -12,6 +12,38 @@ import numpy as np
 #For JECs
 from corrections_modified import *
 
+variables = {
+        'Jet_delta_eta': (100,0,5),
+        'Jet_delta_phi': (100,0,5),
+        'Jet_delta_pT': (1000,0,1000),
+        'Jet_pT2pT1': (100,0,1),
+        'Jet_delta_R': (100,0,5)
+    }
+cut_conditions = {
+	'pt2pt1': 'Jet_pT2pT1 > 0.02',
+	'Delta_R': 'Jet_delta_R < 3.95'
+}
+
+def plot_jet_kinematics_by_flavour(df, histos, label_suffix=''):
+    """
+    Create pt and eta histograms of jets, separated by parton flavour (1 to 5).
+    Optionally, a label_suffix can be passed to distinguish histos after cuts.
+    """
+    for k in range(1, 6):
+        pt_col = f'Jet_TightID_Pt30_Central_Pt_Flavour{k}{label_suffix}'
+        eta_col = f'Jet_TightID_Pt30_Central_Eta_Flavour{k}{label_suffix}'
+
+        df = df.Define(pt_col, f'Jet_TightID_Pt30_Central_Pt[Jet_TightID_Pt30_Central_PartonFlavour{k}]')
+        df = df.Define(eta_col, f'Jet_TightID_Pt30_Central_Eta[Jet_TightID_Pt30_Central_PartonFlavour{k}]')
+
+        pt_hist_name = f'jet_pt_partonflavour{k}{label_suffix}'
+        eta_hist_name = f'jet_eta_partonflavour{k}{label_suffix}'
+
+        histos[pt_hist_name] = df.Histo1D(ROOT.RDF.TH1DModel(pt_hist_name, '', 100, 0, 500), pt_col, 'LHEWeight_originalXWGTUP')
+        histos[eta_hist_name] = df.Histo1D(ROOT.RDF.TH1DModel(eta_hist_name, '', 50, -2.5, 2.5), eta_col, 'LHEWeight_originalXWGTUP')
+    
+    return df
+
 def GammaZSelection(df, year=2023, era='C', isData=False):
     '''
     Select events with = 1 photon with pT>100 GeV.
@@ -19,9 +51,32 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     Requires exactly 2 jets
     '''
     histos = {}
+    
+    def cut_fill_histos(df, condition_expr,label):
+        histos_cut = {}
+        df_cut = df.Filter(condition_expr,label)
+        
+        # Inclusive mjj
+        histos_cut[f'mjj_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'mjj_cut_{label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+
+        # Flavour-filtered mjj
+        for k in range(1,6):
+            flav_label = f'cut_{label}_flavour_{k}'
+            histos_cut[f'mjj_{flav_label}'] = df_cut.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{k})==2').Histo1D(ROOT.RDF.TH1DModel(f'mjj_{flav_label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+
+        # Inclusive Kinematic histograms
+        for varname,(nbins,xmin,xmax) in variables.items():
+            histos_cut[f'{varname}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
+        
+        # Flavour-filtered kinematic histograms
+        for varname,(nbins,xmin,xmax) in variables.items():
+            for k in range(1,6):
+                histos_cut[f'{varname}_cut_{label}_PartonFlavour{k}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}_PartonFlavour{k}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
+
+        return histos_cut
+
     #Trigger
     df = df.Filter('HLT_Photon50EB_TightID_TightIso||HLT_Photon45EB_TightID_TightIso','HLT_Photon50EB_TightID_TightIso||HLT_Photon45EB_TightID_TightIso')
-
 
     #Offline photon, define a loose ID for pt>20. This will be used for vetoing additional photons 
     df = df.Define('Photon_LooseID_Pt20','Photon_mvaID_WP90&&abs(Photon_eta)<1.4442&&Photon_pt>20') 
@@ -72,23 +127,21 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     
     #The subset of these jets which hold a specific flavour
     df = df.Define('Jet_TightID_Pt30_Central_partonFlavour', 'Jet_partonFlavour[Jet_TightID_Pt30_Central]')
-    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour1', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==1')
-    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour2', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==2')
-    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour3', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==3') 
-    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour4', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==4')
-    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour5', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==5')
-    df = df.Define('Jet_TightID_Pt30_Central_PartonFlavour6', 'abs(Jet_TightID_Pt30_Central_partonFlavour)==6')
+    for k in range(1,7):
+        df = df.Define(f'Jet_TightID_Pt30_Central_PartonFlavour{k}',f'abs(Jet_TightID_Pt30_Central_partonFlavour)=={k}')
     #For now, consider only events with exactly 2 central jets and no other jet
     df = df.Filter('Sum(Jet_TightID_Pt30)==2&&Sum(Jet_TightID_Pt30_Central)==2','=2 central jets with pt>30 GeV, no additional jet')
     histos['photon_pt_2jselection'] = df.Histo1D(ROOT.RDF.TH1DModel('photon_pt_2jselection', '', 1000, 0, 1000), 'Photon_LooseID_Pt20_pt', 'LHEWeight_originalXWGTUP')
 
-    #Compute the dijet invariant mass and remore invariant mass outside range of study
+    #Compute the dijet invariant mass and remove invariant mass mjj outside range of study
     df = df.Define('Mjj_Before_Deltas', 'InvariantMass(Jet_TightID_Pt30_Central_Pt[0], Jet_TightID_Pt30_Central_Eta[0], Jet_TightID_Pt30_Central_Phi[0], Jet_TightID_Pt30_Central_Mass[0], Jet_TightID_Pt30_Central_Pt[1], Jet_TightID_Pt30_Central_Eta[1], Jet_TightID_Pt30_Central_Phi[1], Jet_TightID_Pt30_Central_Mass[1])')
     df = df.Filter('Mjj_Before_Deltas < 200','Invariant mass clearly outside the range of this study')    
-
+    
+    # --- Define key kinematic variables to study their behaviors ---
     # Delta eta
     df = df.Define('Jet_delta_eta','abs(Jet_TightID_Pt30_Central_Eta[0]-Jet_TightID_Pt30_Central_Eta[1])')
     histos['Jet_delta_eta'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_delta_eta','',100,0,5), 'Jet_delta_eta','LHEWeight_originalXWGTUP')
+
     # Delta phi
     df = df.Define('Jet_delta_phi','abs(acos(cos(Jet_TightID_Pt30_Central_Phi[0]-Jet_TightID_Pt30_Central_Phi[1])))')
     histos['Jet_delta_phi'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_delta_phi','',100,0,5), 'Jet_delta_phi','LHEWeight_originalXWGTUP')
@@ -107,7 +160,7 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     df = df.Define('Jet_delta_R','sqrt(pow(Jet_delta_eta,2) + pow(Jet_delta_phi,2))')
     histos['Jet_delta_R'] = df.Histo1D(ROOT.RDF.TH1DModel('Jet_delta_R','',100,0,5),'Jet_delta_R','LHEWeight_originalXWGTUP')
 
-    # Veto Delta R(photon,j1) > 0.4
+    # Veto Delta R(photon,j) > 0.4 with j = leading and subleading jet
     df = df.Define('PJet_Delta_eta','abs(Photon_TightID_Pt100_eta[0]-Jet_TightID_Pt30_Central_Eta[0])') # Delta eta leading jet and photon
     df = df.Define('PJet_Delta_phi','abs(acos(cos(Photon_TightID_Pt100_phi[0]-Jet_TightID_Pt30_Central_Phi[0])))') # Delta phi leading jet and photon
     df = df.Define('PSubJet_Delta_eta','abs(Photon_TightID_Pt100_eta[0]-Jet_TightID_Pt30_Central_Eta[1])') # Delta eta subleading jet and photon
@@ -119,75 +172,68 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     df = df.Filter('PJet_Delta_R > 0.4 && PSubJet_Delta_R > 0.4',f'Angular distance between the photon and both jets is > 0.4')
     
     # Plot these variables in histograms
-    flavour_id = [k for k in range(1,6)]
-    variables = {
-    	'Jet_delta_eta': (100,0,5),
-	'Jet_delta_phi': (100,0,5),
-	'Jet_delta_pT': (1000,0,1000),
-	'Jet_pT2pT1': (100,0,1),
-	'Jet_delta_R': (100,0,5)
-    }
     
-    for fid in flavour_id:
+    for k in range(1,6):
     	# Create a filtered datafrom for each flavour
-        flav_var = f'Jet_TightID_Pt30_Central_PartonFlavour{fid}'
-        df_flav = df.Filter(f'Sum({flav_var})==2',f'Both jets have flavour {fid}')
+        flav_var = f'Jet_TightID_Pt30_Central_PartonFlavour{k}'
+        df_flav = df.Filter(f'Sum({flav_var})==2',f'Both jets have flavour {k}')
 	# Loop over each variable
         for varname, (nbins,xmin,xmax) in variables.items():
-            hist_name = f'{varname}_PartonFlavour{fid}'
+            hist_name = f'{varname}_PartonFlavour{k}'
             histos[hist_name] = df_flav.Histo1D(ROOT.RDF.TH1DModel(hist_name,'',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
 
     #Compute the dijet invariant mass 
     df = df.Define('Mjj', 'InvariantMass(Jet_TightID_Pt30_Central_Pt[0], Jet_TightID_Pt30_Central_Eta[0], Jet_TightID_Pt30_Central_Phi[0], Jet_TightID_Pt30_Central_Mass[0], Jet_TightID_Pt30_Central_Pt[1], Jet_TightID_Pt30_Central_Eta[1], Jet_TightID_Pt30_Central_Phi[1], Jet_TightID_Pt30_Central_Mass[1])')
-    histos['mjj'] = df.Histo1D(ROOT.RDF.TH1DModel('mjj', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour1'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour1)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour1', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour2'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour2)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour2', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour3'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour3)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour3', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour4'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour4)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour4', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour5'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour5)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour5', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')    
-    histos['mjj_partonflavour6'] = df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour6)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour6', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP') # Create an histogram for two top jets. Should be empty. This line is just a sanity check.
-    histos['mjj_partonflavour1_bis'] = df.Filter('Jet_TightID_Pt30_Central_PartonFlavour1[0]&&Jet_TightID_Pt30_Central_PartonFlavour1[1]').Histo1D(ROOT.RDF.TH1DModel('mjj_partonflavour1_bis', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+    
+    histos['mjj'] = df.Histo1D(ROOT.RDF.TH1DModel('mjj', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+    for k in range(1,7):
+        histos[f'mjj_partonflavour{k}'] = df.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{k})==2').Histo1D(ROOT.RDF.TH1DModel(f'mjj_partonflavour{k}','',1000,0,1000),'Mjj','LHEWeight_originalXWGTUP')
 
-   # --- Mjj after vetoes: Delta R < 2 and pT2/pT1 > 0.4 ---
-    vetoed_df = df.Filter('Jet_delta_R > 0.75 && Jet_delta_R < 2 && Jet_pT2pT1 > 0.4', 'DeltaR < 2 and pT2/pT1 > 0.4')
+    # Compute and add histograms for the different cuts 
+    for label,condition in cut_conditions.items():
+        extra_histos = cut_fill_histos(df, condition,label)
+        histos.update(extra_histos)
 
-   # Flavour-filtered Mjj histograms AFTER vetoes
-    histos['mjj_vetoed'] = vetoed_df.Histo1D(ROOT.RDF.TH1DModel('mjj_vetoed', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
-    histos['mjj_vetoed_flavour1'] = vetoed_df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour1)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_vetoed_flavour1', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
-    histos['mjj_vetoed_flavour2'] = vetoed_df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour2)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_vetoed_flavour2', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
-    histos['mjj_vetoed_flavour3'] = vetoed_df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour3)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_vetoed_flavour3', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
-    histos['mjj_vetoed_flavour4'] = vetoed_df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour4)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_vetoed_flavour4', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
-    histos['mjj_vetoed_flavour5'] = vetoed_df.Filter('Sum(Jet_TightID_Pt30_Central_PartonFlavour5)==2').Histo1D(ROOT.RDF.TH1DModel('mjj_vetoed_flavour5', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP') 
+
+
+#    # --- pt2/pt1 veto  ---
+#    pt2pt1_vetoed_df = df.Filter('Jet_pT2pT1 > 0.02', 'pT2/pT1 > 0.02')
+#
+#    # Flavour-filtered Mjj histograms AFTER vetoes
+#    for flavour in range(1,6):
+#        hist_name = f'mjj_pt2pt1Veto_PartonFlavour{flavour}'
+#        histos[f'mjj_pt2pt1Veto_flavour{flavour}'] = pt2pt1_vetoed_df.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{flavour})==2').Histo1D(ROOT.RDF.TH1DModel(hist_name, '', 1000, 0, 1000),hist_name,'LHEWeight_originalXWGTUP')
+#    
+#    histos['mjj_pt2pt1veto'] = pt2pt1_vetoed_df.Histo1D(ROOT.RDF.TH1DModel('mjj_vetoed', '', 1000,0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
    
-    # Define pT for each flavour
-
-    df = df.Define('Jet_TightID_Pt30_Central_Pt_Flavour1','Jet_TightID_Pt30_Central_Pt[Jet_TightID_Pt30_Central_PartonFlavour1]')
-    df = df.Define('Jet_TightID_Pt30_Central_Pt_Flavour2','Jet_TightID_Pt30_Central_Pt[Jet_TightID_Pt30_Central_PartonFlavour2]')
-    df = df.Define('Jet_TightID_Pt30_Central_Pt_Flavour3','Jet_TightID_Pt30_Central_Pt[Jet_TightID_Pt30_Central_PartonFlavour3]')
-    df = df.Define('Jet_TightID_Pt30_Central_Pt_Flavour4','Jet_TightID_Pt30_Central_Pt[Jet_TightID_Pt30_Central_PartonFlavour4]')
-    df = df.Define('Jet_TightID_Pt30_Central_Pt_Flavour5','Jet_TightID_Pt30_Central_Pt[Jet_TightID_Pt30_Central_PartonFlavour5]') 
-
-    # Plot pT for each flavour
-
-    histos['jet_pt_flavour1'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_pt_partonflavour1', '', 100, 0, 500),'Jet_TightID_Pt30_Central_Pt_Flavour1','LHEWeight_originalXWGTUP')
-    histos['jet_pt_flavour2'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_pt_partonflavour2', '', 100, 0, 500),'Jet_TightID_Pt30_Central_Pt_Flavour2','LHEWeight_originalXWGTUP')
-    histos['jet_pt_flavour3'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_pt_partonflavour3', '', 100, 0, 500),'Jet_TightID_Pt30_Central_Pt_Flavour3','LHEWeight_originalXWGTUP')
-    histos['jet_pt_flavour4'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_pt_partonflavour4', '', 100, 0, 500),'Jet_TightID_Pt30_Central_Pt_Flavour4','LHEWeight_originalXWGTUP')
-    histos['jet_pt_flavour5'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_pt_partonflavour5', '', 100, 0, 500),'Jet_TightID_Pt30_Central_Pt_Flavour5','LHEWeight_originalXWGTUP')
+    # Plot kinematic observables
  
-    # Define eta for each flavour
-    df = df.Define('Jet_TightID_Pt30_Central_Eta_Flavour1','Jet_TightID_Pt30_Central_Eta[Jet_TightID_Pt30_Central_PartonFlavour1]')
-    df = df.Define('Jet_TightID_Pt30_Central_Eta_Flavour2','Jet_TightID_Pt30_Central_Eta[Jet_TightID_Pt30_Central_PartonFlavour2]')
-    df = df.Define('Jet_TightID_Pt30_Central_Eta_Flavour3','Jet_TightID_Pt30_Central_Eta[Jet_TightID_Pt30_Central_PartonFlavour3]')
-    df = df.Define('Jet_TightID_Pt30_Central_Eta_Flavour4','Jet_TightID_Pt30_Central_Eta[Jet_TightID_Pt30_Central_PartonFlavour4]')
-    df = df.Define('Jet_TightID_Pt30_Central_Eta_Flavour5','Jet_TightID_Pt30_Central_Eta[Jet_TightID_Pt30_Central_PartonFlavour5]')
+    # --- Delta R veto ---
+#    DeltaR_vetoed_df = df.Filter('Jet_delta_R < 3.952','Delta R < 3.952') 
+#    for k in range(1,6):
+#        hist_name = f'mjj_DeltaRVeto_flavour{k}'
+#        column_name = hist_name
+#        histos[hist_name] = DeltaR_vetoed_df.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{flavour})==2').Histo1D(ROOT.RDF.TH1DModel(hist_name,'',1000,0,1000),hist_name,'LHEWeight_originalXWGTUP')
+#    histos['mjj_DeltaRVeto'] =  DeltaR_vetoed_df.Histo1D(ROOT.RDF.TH1DModel('mjj_DeltaRVeto','',1000,0,1000),'Mjj','LHEWeight_originalXWGTUP')
+#
 
-    # Plot eta for each flavour
-    histos['jet_eta_flavour1'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_eta_partonflavour1', '', 50, -2.5, 2.5),'Jet_TightID_Pt30_Central_Eta_Flavour1','LHEWeight_originalXWGTUP')
-    histos['jet_eta_flavour2'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_eta_partonflavour2', '', 50, -2.5, 2.5),'Jet_TightID_Pt30_Central_Eta_Flavour2','LHEWeight_originalXWGTUP')
-    histos['jet_eta_flavour3'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_eta_partonflavour3', '', 50, -2.5, 2.5),'Jet_TightID_Pt30_Central_Eta_Flavour3','LHEWeight_originalXWGTUP')
-    histos['jet_eta_flavour4'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_eta_partonflavour4', '', 50, -2.5, 2.5),'Jet_TightID_Pt30_Central_Eta_Flavour4','LHEWeight_originalXWGTUP')
-    histos['jet_eta_flavour5'] = df.Histo1D(ROOT.RDF.TH1DModel('jet_eta_partonflavour5', '', 50, -2.5, 2.5),'Jet_TightID_Pt30_Central_Eta_Flavour5','LHEWeight_originalXWGTUP')
+    df = plot_jet_kinematics_by_flavour(df, histos)
+    
+#    # Define pT for each flavour
+#    for k in range(1,6):
+#        df = df.Define(f'Jet_TightID_Pt30_Central_Pt_Flavour{k}','Jet_TightID_Pt30_Central_Pt[Jet_TightID_Pt30_Central_PartonFlavour{k}]')
+#
+#    # Plot pT for each flavour
+#    for k in range(1,6):
+#        histos[f'jet_pt_flavour{k}'] = df.Histo1D(ROOT.RDF.TH1DModel(f'jet_pt_partonflavour{k}','',100,0,500),f'Jet_TightID_Pt30_Central_Pt_Flavour{k}','LHEWeight_originalXWGTUP')
+# 
+#    # Define eta for each flavour
+#    for k in range(1,6):
+#        df = df.Define(f'Jet_TightID_Pt30_Central_Eta_Flavour{k}','Jet_TightID_Pt30_Central_Eta[Jet_TightID_Pt30_Central_PartonFlavour{k}]')
+# 
+#    # Plot eta for each flavour
+#    for k in range(1,6):
+#        histos[f'jet_eta_flavour{k}'] = df.Histo1D(ROOT.RDF.TH1DModel(f'jet_eta_partonflavour{k}','',50,-2.5,2.5),f'Jet_TightID_Pt30_Central_Eta_Flavour{k}','LHEWeight_originalXWGTUP')
 
     # Count the number of events per flavour
     n1 = histos['mjj_partonflavour1'].Integral(60, 120)
@@ -198,11 +244,11 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     n = np.array([n1,n2,n3,n4,n5])
     total = sum(n)
 
-    frac1 = n1/total # Valeur thÃorique : 0.115
-    frac2 = n2/total # Valeur thÃorique : 0.156
-    frac3 = n3/total # Valeur thÃorique : 0.156
-    frac4 = n4/total # Valeur thÃorique : 0.115
-    frac5 = n5/total # Valeur thÃorique : 0.151
+    frac1 = n1/total # Valeur thï¿½orique : 0.115
+    frac2 = n2/total # Valeur thï¿½orique : 0.156
+    frac3 = n3/total # Valeur thï¿½orique : 0.156
+    frac4 = n4/total # Valeur thï¿½orique : 0.115
+    frac5 = n5/total # Valeur thï¿½orique : 0.151
     BR_Obs = np.array([frac1,frac2,frac3,frac4,frac5])
     BR_Theo = np.array([0.156, 0.116, 0.156, 0.116, 0.156])  # d, u, s, c, b, t
     BR_Theo = BR_Theo * (1/np.sum(BR_Theo))
