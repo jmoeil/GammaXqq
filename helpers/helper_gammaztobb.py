@@ -53,7 +53,7 @@ def cut_fill_histos(df, condition_expr,label):
 
 	# Flavour-filtered mjj
 	for k in range(1,6):
-	   flav_label = f'cut_{label}_PartonFlavour_{k}'
+	   flav_label = f'PartonFlavour_{k}_cut_{label}'
 	   histos_cut[f'mjj_{flav_label}'] = df_cut.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{k})==2').Histo1D(ROOT.RDF.TH1DModel(f'mjj_{flav_label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
 
 	# Inclusive Kinematic histograms
@@ -63,7 +63,7 @@ def cut_fill_histos(df, condition_expr,label):
 	# Flavour-filtered kinematic histograms
 	for varname,(nbins,xmin,xmax) in variables.items():
 	   for k in range(1,6):
-	       histos_cut[f'{varname}_PartonFlavour{k}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}_PartonFlavour{k}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
+	       histos_cut[f'{varname}_PartonFlavour{k}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_PartonFlavour{k}_cut_{label}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
 
 	return histos_cut
 
