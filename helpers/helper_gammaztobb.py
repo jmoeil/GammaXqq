@@ -44,6 +44,29 @@ def plot_jet_kinematics_by_flavour(df, histos, label_suffix=''):
     
     return df
 
+def cut_fill_histos(df, condition_expr,label):
+	histos_cut = {}
+	df_cut = df.Filter(condition_expr,label)
+
+	# Inclusive mjj
+	histos_cut[f'mjj_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'mjj_cut_{label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+
+	# Flavour-filtered mjj
+	for k in range(1,6):
+	   flav_label = f'cut_{label}_PartonFlavour_{k}'
+	   histos_cut[f'mjj_{flav_label}'] = df_cut.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{k})==2').Histo1D(ROOT.RDF.TH1DModel(f'mjj_{flav_label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+
+	# Inclusive Kinematic histograms
+	for varname,(nbins,xmin,xmax) in variables.items():
+	   histos_cut[f'{varname}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
+
+	# Flavour-filtered kinematic histograms
+	for varname,(nbins,xmin,xmax) in variables.items():
+	   for k in range(1,6):
+	       histos_cut[f'{varname}_PartonFlavour{k}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}_PartonFlavour{k}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
+
+	return histos_cut
+
 def GammaZSelection(df, year=2023, era='C', isData=False):
     '''
     Select events with = 1 photon with pT>100 GeV.
@@ -52,29 +75,6 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     '''
     histos = {}
     
-    def cut_fill_histos(df, condition_expr,label):
-        histos_cut = {}
-        df_cut = df.Filter(condition_expr,label)
-        
-        # Inclusive mjj
-        histos_cut[f'mjj_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'mjj_cut_{label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
-
-        # Flavour-filtered mjj
-        for k in range(1,6):
-            flav_label = f'cut_{label}_flavour_{k}'
-            histos_cut[f'mjj_{flav_label}'] = df_cut.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{k})==2').Histo1D(ROOT.RDF.TH1DModel(f'mjj_{flav_label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
-
-        # Inclusive Kinematic histograms
-        for varname,(nbins,xmin,xmax) in variables.items():
-            histos_cut[f'{varname}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
-        
-        # Flavour-filtered kinematic histograms
-        for varname,(nbins,xmin,xmax) in variables.items():
-            for k in range(1,6):
-                histos_cut[f'{varname}_cut_{label}_PartonFlavour{k}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}_PartonFlavour{k}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
-
-        return histos_cut
-
     #Trigger
     df = df.Filter('HLT_Photon50EB_TightID_TightIso||HLT_Photon45EB_TightID_TightIso','HLT_Photon50EB_TightID_TightIso||HLT_Photon45EB_TightID_TightIso')
 
@@ -194,47 +194,8 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
         extra_histos = cut_fill_histos(df, condition,label)
         histos.update(extra_histos)
 
-
-
-#    # --- pt2/pt1 veto  ---
-#    pt2pt1_vetoed_df = df.Filter('Jet_pT2pT1 > 0.02', 'pT2/pT1 > 0.02')
-#
-#    # Flavour-filtered Mjj histograms AFTER vetoes
-#    for flavour in range(1,6):
-#        hist_name = f'mjj_pt2pt1Veto_PartonFlavour{flavour}'
-#        histos[f'mjj_pt2pt1Veto_flavour{flavour}'] = pt2pt1_vetoed_df.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{flavour})==2').Histo1D(ROOT.RDF.TH1DModel(hist_name, '', 1000, 0, 1000),hist_name,'LHEWeight_originalXWGTUP')
-#    
-#    histos['mjj_pt2pt1veto'] = pt2pt1_vetoed_df.Histo1D(ROOT.RDF.TH1DModel('mjj_vetoed', '', 1000,0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
-   
-    # Plot kinematic observables
- 
-    # --- Delta R veto ---
-#    DeltaR_vetoed_df = df.Filter('Jet_delta_R < 3.952','Delta R < 3.952') 
-#    for k in range(1,6):
-#        hist_name = f'mjj_DeltaRVeto_flavour{k}'
-#        column_name = hist_name
-#        histos[hist_name] = DeltaR_vetoed_df.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{flavour})==2').Histo1D(ROOT.RDF.TH1DModel(hist_name,'',1000,0,1000),hist_name,'LHEWeight_originalXWGTUP')
-#    histos['mjj_DeltaRVeto'] =  DeltaR_vetoed_df.Histo1D(ROOT.RDF.TH1DModel('mjj_DeltaRVeto','',1000,0,1000),'Mjj','LHEWeight_originalXWGTUP')
-#
-
     df = plot_jet_kinematics_by_flavour(df, histos)
     
-#    # Define pT for each flavour
-#    for k in range(1,6):
-#        df = df.Define(f'Jet_TightID_Pt30_Central_Pt_Flavour{k}','Jet_TightID_Pt30_Central_Pt[Jet_TightID_Pt30_Central_PartonFlavour{k}]')
-#
-#    # Plot pT for each flavour
-#    for k in range(1,6):
-#        histos[f'jet_pt_flavour{k}'] = df.Histo1D(ROOT.RDF.TH1DModel(f'jet_pt_partonflavour{k}','',100,0,500),f'Jet_TightID_Pt30_Central_Pt_Flavour{k}','LHEWeight_originalXWGTUP')
-# 
-#    # Define eta for each flavour
-#    for k in range(1,6):
-#        df = df.Define(f'Jet_TightID_Pt30_Central_Eta_Flavour{k}','Jet_TightID_Pt30_Central_Eta[Jet_TightID_Pt30_Central_PartonFlavour{k}]')
-# 
-#    # Plot eta for each flavour
-#    for k in range(1,6):
-#        histos[f'jet_eta_flavour{k}'] = df.Histo1D(ROOT.RDF.TH1DModel(f'jet_eta_partonflavour{k}','',50,-2.5,2.5),f'Jet_TightID_Pt30_Central_Eta_Flavour{k}','LHEWeight_originalXWGTUP')
-
     # Count the number of events per flavour
     n1 = histos['mjj_partonflavour1'].Integral(60, 120)
     n2 = histos['mjj_partonflavour2'].Integral(60, 120)
@@ -244,11 +205,11 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     n = np.array([n1,n2,n3,n4,n5])
     total = sum(n)
 
-    frac1 = n1/total # Valeur th�orique : 0.115
-    frac2 = n2/total # Valeur th�orique : 0.156
-    frac3 = n3/total # Valeur th�orique : 0.156
-    frac4 = n4/total # Valeur th�orique : 0.115
-    frac5 = n5/total # Valeur th�orique : 0.151
+    frac1 = n1/total # Expected value : 0.115
+    frac2 = n2/total # Expected value : 0.156
+    frac3 = n3/total # Expected value : 0.156
+    frac4 = n4/total # Expected value : 0.115
+    frac5 = n5/total # Expected value : 0.151
     BR_Obs = np.array([frac1,frac2,frac3,frac4,frac5])
     BR_Theo = np.array([0.156, 0.116, 0.156, 0.116, 0.156])  # d, u, s, c, b, t
     BR_Theo = BR_Theo * (1/np.sum(BR_Theo))
@@ -256,31 +217,6 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     ndof = len(BR_Obs) - 1
     difference = BR_Obs-BR_Theo
     chi2 = np.sum((BR_Obs-BR_Theo)**2/BR_Theo)
-    p = 1 - stats.chi2.cdf(chi2,ndof)   
-    
-    # Get the number of bins
-
-    #n_bins1 = histos['mjj_partonflavour1'].GetNbinsX()
-    #n_bins2 = histos['mjj_partonflavour2'].GetNbinsX()
-    #n_bins3 = histos['mjj_partonflavour3'].GetNbinsX()
-    #n_bins4 = histos['mjj_partonflavour4'].GetNbinsX()
-    #n_bins5 = histos['mjj_partonflavour5'].GetNbinsX()
-    
-    # Extract the bin centers and their contents (values)
-
-    #bin_contents1 = np.array([histos['mjj_partonflavour1'].GetBinContent(i+1) for i in range(n_bins1)])  # Histogram values
-    #bin_contents2 = np.array([histos['mjj_partonflavour2'].GetBinContent(i+1) for i in range(n_bins2)])  # Histogram values
-    #bin_contents3 = np.array([histos['mjj_partonflavour3'].GetBinContent(i+1) for i in range(n_bins3)])  # Histogram values
-    #bin_contents4 = np.array([histos['mjj_partonflavour4'].GetBinContent(i+1) for i in range(n_bins4)])  # Histogram values
-    #bin_contents5 = np.array([histos['mjj_partonflavour5'].GetBinContent(i+1) for i in range(n_bins5)])  # Histogram values
-    # Use find_peaks to extract the peaks
-
-    #peaks1, properties1 = find_peaks(bin_contents1, height=300, prominence=100)  # Ajuste ces seuils selon tes donnée
-    #peaks2, properties2 = find_peaks(bin_contents2, height=300, prominence=100)  # Ajuste ces seuils selon tes donnée
-    #peaks3, properties3 = find_peaks(bin_contents3, height=300, prominence=100)  # Ajuste ces seuils selon tes donnée
-    #peaks4, properties4 = find_peaks(bin_contents4, height=300, prominence=100)  # Ajuste ces seuils selon tes donnée
-    #peaks5, properties5 = find_peaks(bin_contents5, height=300, prominence=100)  # Ajuste ces seuils selon tes donné
-    #peaks = np.array([
-
+    p = 1 - stats.chi2.cdf(chi2,ndof)       
  
     return df, histos, BR_Obs, n, total, ndof, chi2, difference, p
