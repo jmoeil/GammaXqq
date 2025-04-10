@@ -1,6 +1,7 @@
 import ROOT
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 # --- Import ROOT files ---
 file_sg = ROOT.TFile('../../Source.root')
@@ -15,10 +16,17 @@ variables = {
     r'$\Delta R$': {'hist_name': 'Jet_delta_R', 'xrange': (0, 4),'cut_dir': 'less'}
 }
 
+# --- Cut suffixes ---
+
+cut_suffixes = {
+        'nocut':'',
+        'pt2pt1':'_cut_pt2pt1'
+}
+
 # --- Plot S/sqrt(S+B) ---
 
 # --- Make a plot ---
-def plot_significance(cut_points, significances, variable_name=None, save_path=None):
+def plot_significance(cut_points, significances, variable_name=None, save_path=None, cut_name=None):
     """
     Plot signal significance S / sqrt(S + B) vs cut threshold.
 
@@ -37,11 +45,13 @@ def plot_significance(cut_points, significances, variable_name=None, save_path=N
 
     # Plot curve
     plt.plot(cut_points, significances, label='Signal significance', lw=2)
+    title = r'Signal Significance vs Cut on ' + variable_name
+    if cut_name != 'nocut':
+        title += rf' (after $\mathrm{{{cut_name}}}$ cut)'
     plt.xlabel(f'Cut value on {variable_name}' if variable_name else 'Cut value')
     plt.axvline(best_cut,color='red',linestyle='--',label=f'Highest signal significance is {best_significance:.3f} at {best_cut:.3f}')
     plt.scatter([best_cut],[best_significance],color='red',zorder=5)
     plt.ylabel(r'Significance $S / \sqrt{S + B}$')
-    title = f'Signal Significance vs Cut on {variable_name}' if variable_name else 'Signal Significance vs Cut'
     plt.title(title)
     plt.grid(True)
     plt.legend()
@@ -52,32 +62,35 @@ def plot_significance(cut_points, significances, variable_name=None, save_path=N
 # --- Plot significance curves ---
 
 for label, info in variables.items():
-    sg_hist = file_sg.Get(f'{info["hist_name"]}_zg')
-    bg_hist = file_bg.Get(f'{info["hist_name"]}_gjets')
+        for cut_key,cut_suffix in cut_suffixes.items():
+            sg_hist = file_sg.Get(f'{info["hist_name"]}{cut_suffix}_zg')
+            bg_hist = file_bg.Get(f'{info["hist_name"]}{cut_suffix}_gjets')
 
-    if not sg_hist or not bg_hist or sg_hist.Integral() == 0 or bg_hist.Integral() == 0:
-        print(f"Skipping {label} due to missing or empty histograms.")
-        continue
+            if not sg_hist or not bg_hist or sg_hist.Integral() == 0 or bg_hist.Integral() == 0:
+                print(f"Skipping {label} - {cut_suffix} due to missing or empty histograms.")
+                continue
 
-    # Normalize
-    sg_hist.Scale(1 / sg_hist.Integral())
-    bg_hist.Scale(1 / bg_hist.Integral())
+            # Normalize
+            sg_hist.Scale(1 / sg_hist.Integral())
+            bg_hist.Scale(1 / bg_hist.Integral())
 
-    x_min, x_max = info['xrange']
-    x_vals = np.linspace(x_min, x_max, 500)
-    significances,cut_points = [],[]
-    for threshold in x_vals:
-        bin_thr = sg_hist.GetXaxis().FindBin(threshold)
-        if info['cut_dir'] == "less":
-            S = sg_hist.Integral(1, bin_thr)
-            B = bg_hist.Integral(1, bin_thr)
-        else:
-            S = sg_hist.Integral(bin_thr, sg_hist.GetNbinsX())
-            B = bg_hist.Integral(bin_thr, bg_hist.GetNbinsX())
-        
-        if S + B > 0:
-            significance = S/np.sqrt(S+B)
-            significances.append(significance)
-            cut_points.append(threshold)
-    plot_significance(cut_points,significances,label,f'plots/Significance_{info["hist_name"]}.png')
-    print(f'Significance curve for {label} plotted.')
+            x_min, x_max = info['xrange']
+            x_vals = np.linspace(x_min, x_max, 500)
+            significances,cut_points = [],[]
+            for threshold in x_vals:
+                bin_thr = sg_hist.GetXaxis().FindBin(threshold)
+                if info['cut_dir'] == "less":
+                    S = sg_hist.Integral(1, bin_thr)
+                    B = bg_hist.Integral(1, bin_thr)
+                else:
+                    S = sg_hist.Integral(bin_thr, sg_hist.GetNbinsX())
+                    B = bg_hist.Integral(bin_thr, bg_hist.GetNbinsX())
+                
+                if S + B > 0:
+                    significance = S/np.sqrt(S+B)
+                    significances.append(significance)
+                    cut_points.append(threshold)
+            outdir = f'plots/{cut_key}/'
+            os.makedirs(outdir,exist_ok=True)
+            plot_significance(cut_points,significances,label,f'{outdir}Significance_{info["hist_name"]}.png',cut_key)
+            print(f'Significance curve for {label} [{cut_key}] plotted.')

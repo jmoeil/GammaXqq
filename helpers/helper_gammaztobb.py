@@ -12,6 +12,11 @@ import numpy as np
 #For JECs
 from corrections_modified import *
 
+'''
+TO DO : uniformize mjj_partonflavour vs mjj_PartonFlavour
+'''
+
+
 variables = {
         'Jet_delta_eta': (100,0,5),
         'Jet_delta_phi': (100,0,5),
@@ -20,8 +25,8 @@ variables = {
         'Jet_delta_R': (100,0,5)
     }
 cut_conditions = {
-	'pt2pt1': 'Jet_pT2pT1 > 0.02',
-	'Delta_R': 'Jet_delta_R < 3.95'
+        'pt2pt1': 'Jet_pT2pT1 > 0.02',
+        'Delta_R': 'Jet_delta_R < 3.95'
 }
 
 def plot_jet_kinematics_by_flavour(df, histos, label_suffix=''):
@@ -45,27 +50,28 @@ def plot_jet_kinematics_by_flavour(df, histos, label_suffix=''):
     return df
 
 def cut_fill_histos(df, condition_expr,label):
-	histos_cut = {}
-	df_cut = df.Filter(condition_expr,label)
+        histos_cut = {}
+        df_cut = df.Filter(condition_expr,label)
 
-	# Inclusive mjj
-	histos_cut[f'mjj_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'mjj_cut_{label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+        # Inclusive mjj
+        histos_cut[f'mjj_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'mjj_cut_{label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
 
-	# Flavour-filtered mjj
-	for k in range(1,6):
-	   flav_label = f'PartonFlavour_{k}_cut_{label}'
-	   histos_cut[f'mjj_{flav_label}'] = df_cut.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{k})==2').Histo1D(ROOT.RDF.TH1DModel(f'mjj_{flav_label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
+        # Flavour-filtered mjj
+        for k in range(1,6):
+           flav_label = f'PartonFlavour_{k}_cut_{label}'
+           histos_cut[f'mjj_{flav_label}'] = df_cut.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{k})==2').Histo1D(ROOT.RDF.TH1DModel(f'mjj_{flav_label}', '', 1000, 0, 1000), 'Mjj', 'LHEWeight_originalXWGTUP')
 
-	# Inclusive Kinematic histograms
-	for varname,(nbins,xmin,xmax) in variables.items():
-	   histos_cut[f'{varname}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
+        # Inclusive Kinematic histograms
+        for varname,(nbins,xmin,xmax) in variables.items():
+           histos_cut[f'{varname}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_cut_{label}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
 
-	# Flavour-filtered kinematic histograms
-	for varname,(nbins,xmin,xmax) in variables.items():
-	   for k in range(1,6):
-	       histos_cut[f'{varname}_PartonFlavour{k}_cut_{label}'] = df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_PartonFlavour{k}_cut_{label}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
+        # Flavour-filtered kinematic histograms
+        for varname,(nbins,xmin,xmax) in variables.items():
+           for k in range(1,6):
+               flav_df_cut = df_cut.Filter(f'Sum(Jet_TightID_Pt30_Central_PartonFlavour{k})==2')
+               histos_cut[f'{varname}_PartonFlavour{k}_cut_{label}'] = flav_df_cut.Histo1D(ROOT.RDF.TH1DModel(f'{varname}_PartonFlavour{k}_cut_{label}','',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')
 
-	return histos_cut
+        return histos_cut
 
 def GammaZSelection(df, year=2023, era='C', isData=False):
     '''
@@ -174,10 +180,10 @@ def GammaZSelection(df, year=2023, era='C', isData=False):
     # Plot these variables in histograms
     
     for k in range(1,6):
-    	# Create a filtered datafrom for each flavour
+        # Create a filtered datafrom for each flavour
         flav_var = f'Jet_TightID_Pt30_Central_PartonFlavour{k}'
         df_flav = df.Filter(f'Sum({flav_var})==2',f'Both jets have flavour {k}')
-	# Loop over each variable
+        # Loop over each variable
         for varname, (nbins,xmin,xmax) in variables.items():
             hist_name = f'{varname}_PartonFlavour{k}'
             histos[hist_name] = df_flav.Histo1D(ROOT.RDF.TH1DModel(hist_name,'',nbins,xmin,xmax),varname,'LHEWeight_originalXWGTUP')

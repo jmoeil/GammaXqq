@@ -1,5 +1,7 @@
 import ROOT
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")  # avoid GUI with matplotlib
 import matplotlib.pyplot as plt
 import os
 
@@ -126,10 +128,10 @@ for cut_name,cut_suffix in cuts.items():
                         print(f'ROC curve for {label} ready')
                         
                 for flavour in flavours:
-                        suffix = f'_{flavour}' if flavour else ''
-
-                        sg_hist_name = f'{info["hist_name"]}{cut_suffix}{suffix}_zg'
-                        bg_hist_name = f'{info["hist_name"]}{cut_suffix}{suffix}_gjets'
+                        #suffix = f'_{flavour}' if flavour else ''
+                        suffix = f'_{flavour}{cut_suffix}'
+                        sg_hist_name = f'{info["hist_name"]}{suffix}_zg'
+                        bg_hist_name = f'{info["hist_name"]}{suffix}_gjets'
 
                         sg_hist = file_sg.Get(sg_hist_name)
                         bg_hist = file_bg.Get(bg_hist_name)
