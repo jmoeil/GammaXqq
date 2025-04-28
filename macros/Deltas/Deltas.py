@@ -1,6 +1,8 @@
 import ROOT
 #from array import array
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")  # Use non-interactive backend (no display needed)
 import matplotlib.pyplot as plt
 from scipy.stats import chi2 as chi2_stats
 import csv

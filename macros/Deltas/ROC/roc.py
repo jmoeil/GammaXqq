@@ -22,12 +22,14 @@ variables = {
 
 cuts = {
     'nocut': '',
-    'pt2pt1': '_cut_pt2pt1'
+    'pt2pt1': '_cut_pt2pt1',
+    'Delta_R': '_cut_pt2pt1_Delta_R'
 }
 
 cut_labels = {
     'nocut': 'No cut',
-    'pt2pt1': r'$p_{T2}/p_{T1} > 0.02$'
+    'pt2pt1': r'$p_{T2}/p_{T1} > 0.02$',
+    'Delta_R': r'$\Delta R < 3.95$'
 }
 
 # --- Stock global curves ---
@@ -59,6 +61,7 @@ def plot_roc(FPR,TPR,labels,title,outpath,auc=None):
         plt.grid(True)
         plt.tight_layout()
         os.makedirs(os.path.dirname(outpath),exist_ok=True)
+        plt.grid(True, linestyle='--', alpha=0.5)
         plt.savefig(outpath,dpi=300)
         plt.close()
 
