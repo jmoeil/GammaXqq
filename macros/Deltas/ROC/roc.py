@@ -12,10 +12,12 @@ file_bg = ROOT.TFile('../../Background.root')
 # --- Kinematic Variables ---
 variables = {
     r'$\Delta\eta$': {'hist_name': 'Jet_delta_eta', 'xrange': (0, 5),'cut_dir': 'less'},
+    r'$\Delta\phi$': {'hist_name': 'Jet_delta_phi', 'xrange': (-np.pi, np.pi),'cut_dir': 'less'},
+    r'$\Delta R$': {'hist_name': 'Jet_delta_R', 'xrange': (0, 4),'cut_dir': 'less'},
     r'$\Delta p_T$': {'hist_name': 'Jet_delta_pT', 'xrange': (0, 250),'cut_dir': 'less'},
-    r'$\Delta\Phi$': {'hist_name': 'Jet_delta_phi', 'xrange': (-np.pi, np.pi),'cut_dir': 'less'},
-    r'$\frac{p_{T2}}{p_{T1}}$': {'hist_name': 'Jet_pT2pT1', 'xrange': (0, 1),'cut_dir': 'greater'},
-    r'$\Delta R$': {'hist_name': 'Jet_delta_R', 'xrange': (0, 4),'cut_dir': 'less'}
+    r'$\frac{p_{T2}}{p_{T1}}$': {'hist_name': 'Jet_pT2pT1', 'xrange': (0, 1),'cut_dir': 'greater'}
+    
+#    r"$b$-tag sum": {"hist_name": 'Jet_btagPNetB_sum', "xrange": (0,1), "cut_dir":'greater'}
 }
 
 # --- Different cuts ---
@@ -132,7 +134,7 @@ for cut_name,cut_suffix in cuts.items():
                         
                 for flavour in flavours:
                         #suffix = f'_{flavour}' if flavour else ''
-                        suffix = f'_{flavour}{cut_suffix}'
+                        suffix = f'_{flavour}' if cut_name=="nocut" else f'_{flavour}{cut_suffix}'
                         sg_hist_name = f'{info["hist_name"]}{suffix}_zg'
                         bg_hist_name = f'{info["hist_name"]}{suffix}_gjets'
 
